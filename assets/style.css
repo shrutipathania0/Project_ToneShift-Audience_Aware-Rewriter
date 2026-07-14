@@ -311,24 +311,82 @@ div.stDownloadButton > button:active {
     box-shadow: 0 0 0 3px rgba(91, 184, 245, 0.25), inset 0 2px 6px rgba(90, 60, 40, 0.06) !important;
 }
 
-/* ── Dropdowns & selectbox with 3D base ── */
+/* ── Selectbox (Forcing Explicit Dark Selected Text) ── */
+[data-testid="stSelectbox"] {
+    font-family: 'Nunito', sans-serif !important;
+}
+
 [data-testid="stSelectbox"] > div > div {
     background: #ffffff !important;
     border: 2px solid #eadecf !important;
     border-radius: 16px !important;
     box-shadow: 0 4px 0px #e0d4cc, 0 8px 16px rgba(90, 60, 40, 0.05) !important;
+    height: 48px !important;
+}
+
+/* Force dark selected value text */
+[data-testid="stSelectbox"] [data-baseweb="select"] * {
+    color: #1a1a2e !important;
     font-family: 'Nunito', sans-serif !important;
     font-weight: 800 !important;
+    font-size: 0.95rem !important;
+}
+
+/* Dropdown Menu Portal Overlay Styling */
+[data-baseweb="popover"] {
+    background-color: transparent !important;
+}
+
+[data-baseweb="menu"] {
+    background-color: #ffffff !important;
+    border: 2px solid #eadecf !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(90, 60, 40, 0.15) !important;
+    padding: 6px !important;
+}
+
+[data-baseweb="menu"] * {
+    color: #1a1a2e !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+}
+
+[data-baseweb="menu"] li[role="option"] {
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+[data-baseweb="menu"] li[role="option"]:hover,
+[data-baseweb="menu"] li[role="option"][aria-selected="true"] {
+    background-color: #f5ede8 !important;
     color: #1a1a2e !important;
 }
 
-[data-testid="stSelectbox"] p {
+/* ── Sliders (Forcing Explicit Dark Slider Numbers) ── */
+[data-testid="stSlider"] * {
     color: #1a1a2e !important;
-    font-weight: 800 !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
 }
 
 [data-testid="stSlider"] > div > div > div > div {
     background: linear-gradient(90deg, #ff6b9d, #ff8c42) !important;
+}
+
+/* Checkboxes */
+[data-testid="stCheckbox"] * {
+    color: #1a1a2e !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 800 !important;
+}
+
+/* ── Section headers ── */
+h3, h2, h4 {
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 900 !important;
+    color: #1a1a2e !important;
 }
 
 /* ── 3D Metrics ── */
