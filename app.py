@@ -418,8 +418,13 @@ def main() -> None:
     api_key = get_api_key()
     if not api_key:
         st.warning(
-            "⚠️ **API key not found.** Create a `.env` file in the project root with:\n\n"
-            "`GROQ_API_KEY=your_api_key`"
+            "⚠️ **API key not found.**\n\n"
+            "**Running locally?** Create a `.env` file in the project root:\n"
+            "```\nGROQ_API_KEY=your_api_key\n```\n\n"
+            "**Deployed on Streamlit Cloud?** Go to your app dashboard → "
+            "**Settings → Secrets** and add:\n"
+            "```toml\nGROQ_API_KEY = \"your_api_key\"\n```\n\n"
+            "Get your free API key at [console.groq.com](https://console.groq.com) 🔑"
         )
 
     tab_rewrite, tab_compare, tab_meaning, tab_about = st.tabs(

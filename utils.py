@@ -1,4 +1,5 @@
 """Utility functions for ToneShift."""
+# Supports both local .env files and Streamlit Cloud Secrets Management.
 
 from __future__ import annotations
 
@@ -66,8 +67,27 @@ class ToneShiftError(Exception):
 
 
 def get_api_key() -> Optional[str]:
+    """Return the Groq API key.
+
+    Resolution order:
+    1. Environment variable / .env file  (local development)
+    2. st.secrets["GROQ_API_KEY"]        (Streamlit Cloud deployment)
+    """
+    # 1. Try environment / .env
     key = os.getenv("GROQ_API_KEY", "").strip()
-    return key or None
+    if key:
+        return key
+
+    # 2. Try Streamlit Secrets (cloud deployment)
+    try:
+        import streamlit as st  # noqa: PLC0415
+        key = st.secrets.get("GROQ_API_KEY", "").strip()
+        if key:
+            return key
+    except Exception:  # streamlit not available or secret missing
+        pass
+
+    return None
 
 
 def create_client(api_key: str) -> Groq:
