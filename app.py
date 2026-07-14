@@ -36,7 +36,15 @@ st.set_page_config(
 )
 
 if CSS_PATH.exists():
-    st.markdown(f"<style>{CSS_PATH.read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+        <style>{CSS_PATH.read_text(encoding='utf-8')}</style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def init_session_state() -> None:
@@ -57,8 +65,22 @@ def render_header() -> None:
     st.markdown(
         """
         <div class="ts-hero">
-            <h1>✨ ToneShift: Audience-Aware Rewriter</h1>
-            <p>Intelligently adapt tone, vocabulary, and complexity for any audience — without changing meaning.</p>
+            <h1>✨ ToneShift</h1>
+            <p>Audience-Aware Rewriter — adapt tone, vocabulary &amp; complexity without changing meaning.</p>
+            <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;">
+                <div style="background:#fff3e0;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#b85c00;box-shadow:0 4px 12px rgba(255,140,66,0.20);">
+                    🎙️ 8 Tones
+                </div>
+                <div style="background:#fce4ec;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#a0004a;box-shadow:0 4px 12px rgba(255,107,157,0.20);">
+                    👥 8 Audiences
+                </div>
+                <div style="background:#e3f2fd;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#0050a0;box-shadow:0 4px 12px rgba(91,184,245,0.20);">
+                    🧠 Meaning Check
+                </div>
+                <div style="background:#e8f5e9;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#1b5e20;box-shadow:0 4px 12px rgba(46,204,113,0.20);">
+                    📊 Quality Score
+                </div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,

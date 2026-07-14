@@ -1,132 +1,371 @@
-/* ToneShift custom styles */
+/* ============================================================
+   ToneShift — Redesigned UI
+   Inspired by: warm cream bg, bold typography, 3D-style accents
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+/* ── Global background & font ── */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
+    background-color: #f5ede8 !important;
+    font-family: 'Nunito', sans-serif !important;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #ede4dd !important;
+}
 
 .main .block-container {
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
     max-width: 1200px;
 }
 
+/* ── Hero Banner ── */
 .ts-hero {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 1.5rem 1.75rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.25);
-    margin-bottom: 1.25rem;
+    background: #f5ede8;
+    padding: 2rem 2.5rem 1.5rem 2.5rem;
+    border-radius: 28px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    position: relative;
 }
 
 .ts-hero h1 {
     margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #1a1a2e;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
 }
 
 .ts-hero p {
-    margin: 0.5rem 0 0 0;
-    opacity: 0.95;
+    margin: 0.6rem 0 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #6b5c54;
 }
 
+/* Colored accent blobs behind hero text */
+.ts-hero::before {
+    content: '✨';
+    position: absolute;
+    font-size: 3.5rem;
+    top: 1rem;
+    right: 2rem;
+    filter: drop-shadow(0 8px 16px rgba(255, 120, 80, 0.35));
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-8px); }
+}
+
+/* ── Tab styling ── */
+[data-testid="stTabs"] button {
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    border-radius: 20px !important;
+    color: #6b5c54 !important;
+    background: transparent !important;
+}
+
+[data-testid="stTabs"] button[aria-selected="true"] {
+    color: #1a1a2e !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.10) !important;
+}
+
+/* ── Cards ── */
 .ts-card {
     background: #ffffff;
-    border: 1px solid #e8ecf3;
-    border-radius: 14px;
-    padding: 1rem 1.1rem;
-    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
-    margin-bottom: 0.75rem;
+    border: none;
+    border-radius: 22px;
+    padding: 1.2rem 1.4rem;
+    box-shadow: 0 6px 24px rgba(90, 60, 40, 0.10);
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ts-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(90, 60, 40, 0.14);
 }
 
 .ts-card h4 {
-    margin: 0 0 0.35rem 0;
-    color: #334155;
-    font-size: 0.95rem;
+    margin: 0 0 0.4rem 0;
+    color: #6b5c54;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
+/* Score numbers with colorful pill backgrounds */
 .ts-card .score {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #4f46e5;
-    line-height: 1.1;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #1a1a2e;
+    line-height: 1.0;
+    background: linear-gradient(135deg, #ff6b9d, #ff8c42);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .ts-metric-label {
-    color: #64748b;
-    font-size: 0.85rem;
+    color: #a89080;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 0.2rem;
 }
 
+/* ── Output box ── */
 .ts-output-box {
-    background: #f8fafc;
-    border: 1px solid #dbe3f0;
-    border-radius: 12px;
-    padding: 1rem;
-    min-height: 180px;
+    background: #ffffff;
+    border: none;
+    border-radius: 22px;
+    padding: 1.3rem 1.5rem;
+    min-height: 200px;
     white-space: pre-wrap;
-    line-height: 1.6;
-    color: #0f172a;
+    line-height: 1.75;
+    color: #1a1a2e;
+    font-size: 0.97rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 500;
+    box-shadow: 0 6px 24px rgba(90, 60, 40, 0.10);
 }
 
+/* ── Diff / Comparison ── */
 .ts-arrow {
     text-align: center;
-    font-size: 1.6rem;
-    color: #6366f1;
-    margin: 0.4rem 0;
+    font-size: 1.8rem;
+    margin: 0.5rem 0;
+    color: #ff8c42;
+    filter: drop-shadow(0 4px 6px rgba(255, 140, 66, 0.3));
 }
 
 .diff-added {
-    background-color: #dcfce7;
-    color: #166534;
-    padding: 0.1rem 0.2rem;
-    border-radius: 4px;
+    background: linear-gradient(135deg, #d4f5e2, #a8edca);
+    color: #0a5c35;
+    padding: 0.15rem 0.35rem;
+    border-radius: 6px;
+    font-weight: 700;
 }
 
 .diff-removed {
-    background-color: #fee2e2;
-    color: #991b1b;
-    padding: 0.1rem 0.2rem;
-    border-radius: 4px;
+    background: linear-gradient(135deg, #ffd6dc, #ffb3bc);
+    color: #8b1a2a;
+    padding: 0.15rem 0.35rem;
+    border-radius: 6px;
     text-decoration: line-through;
+    font-weight: 700;
 }
 
+/* ── Status / Alert boxes ── */
 .ts-warning {
-    background: #fff7ed;
-    border: 1px solid #fdba74;
-    color: #9a3412;
-    border-radius: 12px;
-    padding: 0.9rem 1rem;
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: none;
+    border-left: 5px solid #ff8c42;
+    color: #7a3a00;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(255, 140, 66, 0.15);
 }
 
 .ts-success {
-    background: #ecfdf5;
-    border: 1px solid #6ee7b7;
-    color: #065f46;
-    border-radius: 12px;
-    padding: 0.9rem 1rem;
+    background: linear-gradient(135deg, #e8fdf3, #c8f7e0);
+    border: none;
+    border-left: 5px solid #2ecc71;
+    color: #0a5c35;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(46, 204, 113, 0.15);
 }
 
 .ts-error {
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-    border-radius: 12px;
-    padding: 0.9rem 1rem;
+    background: linear-gradient(135deg, #ffeef1, #ffd6dc);
+    border: none;
+    border-left: 5px solid #ff6b9d;
+    color: #7a0028;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.15);
 }
 
-div.stButton > button {
-    border-radius: 10px;
+.ts-info {
+    background: linear-gradient(135deg, #e8f4fd, #c5e8fb);
     border: none;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
+    border-left: 5px solid #5bb8f5;
+    color: #0a3d6b;
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
     font-weight: 600;
-    padding: 0.55rem 1.1rem;
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
+}
+
+/* ── Buttons ── */
+div.stButton > button {
+    border-radius: 14px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8c42 100%) !important;
+    color: white !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    padding: 0.6rem 1.4rem !important;
+    box-shadow: 0 6px 18px rgba(255, 107, 157, 0.35) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    letter-spacing: 0.01em !important;
 }
 
 div.stButton > button:hover {
-    color: white;
-    border: none;
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 26px rgba(255, 107, 157, 0.45) !important;
+    color: white !important;
+    border: none !important;
 }
 
-.counter-text {
-    color: #64748b;
-    font-size: 0.85rem;
+div.stButton > button:active {
+    transform: translateY(0px) !important;
 }
+
+/* Primary rewrite button — bigger + blue accent */
+div.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, #5bb8f5 0%, #7c6fe0 100%) !important;
+    box-shadow: 0 6px 20px rgba(91, 184, 245, 0.40) !important;
+    font-size: 1.05rem !important;
+    padding: 0.7rem 1.6rem !important;
+    border-radius: 16px !important;
+}
+
+div.stButton > button[kind="primary"]:hover {
+    box-shadow: 0 10px 28px rgba(91, 184, 245, 0.50) !important;
+}
+
+/* ── Download button ── */
+div.stDownloadButton > button {
+    border-radius: 14px !important;
+    border: 2.5px solid #e8ddd8 !important;
+    background: #ffffff !important;
+    color: #1a1a2e !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(90, 60, 40, 0.08) !important;
+    transition: transform 0.15s ease !important;
+}
+
+div.stDownloadButton > button:hover {
+    transform: translateY(-2px) !important;
+    border-color: #ff8c42 !important;
+    box-shadow: 0 8px 20px rgba(90, 60, 40, 0.12) !important;
+}
+
+/* ── Text inputs & text areas ── */
+[data-testid="stTextArea"] textarea {
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 18px !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 0.97rem !important;
+    font-weight: 500 !important;
+    color: #1a1a2e !important;
+    box-shadow: 0 4px 18px rgba(90, 60, 40, 0.10) !important;
+    padding: 1rem 1.2rem !important;
+    line-height: 1.7 !important;
+}
+
+[data-testid="stTextArea"] textarea:focus {
+    box-shadow: 0 0 0 3px rgba(91, 184, 245, 0.35), 0 4px 18px rgba(90, 60, 40, 0.10) !important;
+}
+
+/* ── Selectbox & Sliders ── */
+[data-testid="stSelectbox"] > div > div {
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 14px rgba(90, 60, 40, 0.09) !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    color: #1a1a2e !important;
+}
+
+[data-testid="stSlider"] > div > div > div > div {
+    background: linear-gradient(90deg, #ff6b9d, #ff8c42) !important;
+}
+
+/* ── Section headers ── */
+h3, h2, h4 {
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 900 !important;
+    color: #1a1a2e !important;
+}
+
+/* ── Metrics ── */
+[data-testid="stMetric"] {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 4px 16px rgba(90, 60, 40, 0.09);
+}
+
+[data-testid="stMetricLabel"] {
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    color: #6b5c54 !important;
+    font-size: 0.82rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 900 !important;
+    color: #1a1a2e !important;
+    font-size: 1.8rem !important;
+}
+
+/* ── Checkboxes ── */
+[data-testid="stCheckbox"] label {
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    color: #3d2e28 !important;
+}
+
+/* ── Counter pill ── */
+.counter-text {
+    color: #a89080;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+/* ── Progress bar ── */
+[data-testid="stProgress"] > div > div {
+    background: linear-gradient(90deg, #ff6b9d, #5bb8f5) !important;
+    border-radius: 99px !important;
+}
+
+/* ── Streamlit alerts ── */
+[data-testid="stAlert"] {
+    border-radius: 16px !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 600 !important;
+}
+
+/* ── Spinner ── */
+[data-testid="stSpinner"] {
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f5ede8; border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: #d4b8ae; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #c4a090; }
