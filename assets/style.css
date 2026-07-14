@@ -1,6 +1,6 @@
 /* ============================================================
-   ToneShift — Redesigned UI
-   Inspired by: warm cream bg, bold typography, 3D-style accents
+   ToneShift — Enhanced 3D UI
+   Inspired by: warm cream bg, bold dark typography, 3D-style accents
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
@@ -9,6 +9,7 @@
 html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     background-color: #f5ede8 !important;
     font-family: 'Nunito', sans-serif !important;
+    color: #1a1a2e !important;
 }
 
 [data-testid="stSidebar"] {
@@ -21,30 +22,42 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
     max-width: 1200px;
 }
 
-/* ── Hero Banner ── */
+/* ── Force Explicit Dark Typography for Visibility ── */
+h1, h2, h3, h4, h5, h6, p, span, li, label,
+[data-testid="stWidgetLabel"] p,
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stCheckbox"] label p,
+.stMarkdown {
+    color: #1a1a2e !important;
+    font-family: 'Nunito', sans-serif !important;
+}
+
+/* ── Hero Banner (3D Style Card) ── */
 .ts-hero {
-    background: #f5ede8;
-    padding: 2rem 2.5rem 1.5rem 2.5rem;
+    background: #ffffff;
+    padding: 2.2rem 2.5rem 1.8rem 2.5rem;
     border-radius: 28px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     text-align: center;
     position: relative;
+    box-shadow: 0 8px 0px #e0d4cc, 0 16px 32px rgba(90, 60, 40, 0.12);
+    border: 2px solid #eadecf;
 }
 
 .ts-hero h1 {
     margin: 0;
-    font-size: 2.6rem;
+    font-size: 2.8rem;
     font-weight: 900;
-    color: #1a1a2e;
+    color: #1a1a2e !important;
     letter-spacing: -0.5px;
     line-height: 1.15;
 }
 
 .ts-hero p {
     margin: 0.6rem 0 0 0;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #6b5c54;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6b5c54 !important;
 }
 
 /* Colored accent blobs behind hero text */
@@ -67,258 +80,271 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
 [data-testid="stTabs"] button {
     font-family: 'Nunito', sans-serif !important;
     font-weight: 800 !important;
-    font-size: 0.95rem !important;
+    font-size: 0.98rem !important;
     border-radius: 20px !important;
     color: #6b5c54 !important;
     background: transparent !important;
+    padding: 0.5rem 1.5rem !important;
 }
 
 [data-testid="stTabs"] button[aria-selected="true"] {
     color: #1a1a2e !important;
     background: #ffffff !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.10) !important;
+    box-shadow: 0 6px 0px #e0d4cc, 0 8px 20px rgba(90, 60, 40, 0.08) !important;
+    border: 1px solid #eadecf !important;
 }
 
-/* ── Cards ── */
+/* ── 3D Cards ── */
 .ts-card {
     background: #ffffff;
-    border: none;
+    border: 2px solid #eadecf;
     border-radius: 22px;
-    padding: 1.2rem 1.4rem;
-    box-shadow: 0 6px 24px rgba(90, 60, 40, 0.10);
-    margin-bottom: 1rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 1.3rem 1.5rem;
+    box-shadow: 0 6px 0px #e0d4cc, 0 12px 24px rgba(90, 60, 40, 0.08);
+    margin-bottom: 1.2rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ts-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(90, 60, 40, 0.14);
+    box-shadow: 0 8px 0px #e0d4cc, 0 16px 32px rgba(90, 60, 40, 0.12);
 }
 
 .ts-card h4 {
     margin: 0 0 0.4rem 0;
-    color: #6b5c54;
-    font-size: 0.82rem;
-    font-weight: 700;
+    color: #6b5c54 !important;
+    font-size: 0.85rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-/* Score numbers with colorful pill backgrounds */
+/* Score numbers with colorful 3D look */
 .ts-card .score {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
     font-weight: 900;
-    color: #1a1a2e;
     line-height: 1.0;
     background: linear-gradient(135deg, #ff6b9d, #ff8c42);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(255, 107, 157, 0.15));
 }
 
 .ts-metric-label {
-    color: #a89080;
-    font-size: 0.78rem;
-    font-weight: 600;
+    color: #a89080 !important;
+    font-size: 0.8rem;
+    font-weight: 700;
     margin-top: 0.2rem;
 }
 
-/* ── Output box ── */
+/* ── 3D Output box ── */
 .ts-output-box {
     background: #ffffff;
-    border: none;
+    border: 2px solid #eadecf;
     border-radius: 22px;
-    padding: 1.3rem 1.5rem;
-    min-height: 200px;
+    padding: 1.4rem 1.6rem;
+    min-height: 220px;
     white-space: pre-wrap;
-    line-height: 1.75;
-    color: #1a1a2e;
-    font-size: 0.97rem;
+    line-height: 1.8;
+    color: #1a1a2e !important;
+    font-size: 1rem;
     font-family: 'Nunito', sans-serif;
-    font-weight: 500;
-    box-shadow: 0 6px 24px rgba(90, 60, 40, 0.10);
+    font-weight: 600;
+    box-shadow: 0 6px 0px #e0d4cc, 0 12px 24px rgba(90, 60, 40, 0.08);
 }
 
 /* ── Diff / Comparison ── */
 .ts-arrow {
     text-align: center;
-    font-size: 1.8rem;
-    margin: 0.5rem 0;
+    font-size: 2rem;
+    margin: 0.6rem 0;
     color: #ff8c42;
     filter: drop-shadow(0 4px 6px rgba(255, 140, 66, 0.3));
 }
 
 .diff-added {
     background: linear-gradient(135deg, #d4f5e2, #a8edca);
-    color: #0a5c35;
+    color: #0a5c35 !important;
     padding: 0.15rem 0.35rem;
     border-radius: 6px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .diff-removed {
     background: linear-gradient(135deg, #ffd6dc, #ffb3bc);
-    color: #8b1a2a;
+    color: #8b1a2a !important;
     padding: 0.15rem 0.35rem;
     border-radius: 6px;
     text-decoration: line-through;
-    font-weight: 700;
+    font-weight: 800;
 }
 
-/* ── Status / Alert boxes ── */
+/* ── 3D Status / Alert boxes ── */
 .ts-warning {
     background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-    border: none;
-    border-left: 5px solid #ff8c42;
-    color: #7a3a00;
-    border-radius: 16px;
-    padding: 1rem 1.2rem;
-    font-weight: 600;
-    box-shadow: 0 4px 16px rgba(255, 140, 66, 0.15);
+    border: 2px solid #ffcc80;
+    color: #7a3a00 !important;
+    border-radius: 18px;
+    padding: 1.1rem 1.3rem;
+    font-weight: 700;
+    box-shadow: 0 4px 0 #ffe0b2, 0 8px 16px rgba(255, 140, 66, 0.15);
 }
+.ts-warning b { color: #7a3a00 !important; }
 
 .ts-success {
     background: linear-gradient(135deg, #e8fdf3, #c8f7e0);
-    border: none;
-    border-left: 5px solid #2ecc71;
-    color: #0a5c35;
-    border-radius: 16px;
-    padding: 1rem 1.2rem;
-    font-weight: 600;
-    box-shadow: 0 4px 16px rgba(46, 204, 113, 0.15);
+    border: 2px solid #a3e2c9;
+    color: #0a5c35 !important;
+    border-radius: 18px;
+    padding: 1.1rem 1.3rem;
+    font-weight: 700;
+    box-shadow: 0 4px 0 #c8f7e0, 0 8px 16px rgba(46, 204, 113, 0.15);
 }
+.ts-success b { color: #0a5c35 !important; }
 
 .ts-error {
     background: linear-gradient(135deg, #ffeef1, #ffd6dc);
-    border: none;
-    border-left: 5px solid #ff6b9d;
-    color: #7a0028;
-    border-radius: 16px;
-    padding: 1rem 1.2rem;
-    font-weight: 600;
-    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.15);
+    border: 2px solid #ffb3bc;
+    color: #7a0028 !important;
+    border-radius: 18px;
+    padding: 1.1rem 1.3rem;
+    font-weight: 700;
+    box-shadow: 0 4px 0 #ffd6dc, 0 8px 16px rgba(255, 107, 157, 0.15);
 }
+.ts-error b { color: #7a0028 !important; }
 
 .ts-info {
     background: linear-gradient(135deg, #e8f4fd, #c5e8fb);
-    border: none;
-    border-left: 5px solid #5bb8f5;
-    color: #0a3d6b;
-    border-radius: 16px;
-    padding: 1rem 1.2rem;
-    font-weight: 600;
+    border: 2px solid #b3e5fc;
+    color: #0a3d6b !important;
+    border-radius: 18px;
+    padding: 1.1rem 1.3rem;
+    font-weight: 700;
+    box-shadow: 0 4px 0 #c5e8fb, 0 8px 16px rgba(91, 184, 245, 0.15);
 }
 
-/* ── Buttons ── */
+/* ── 3D Interactive Buttons ── */
 div.stButton > button {
-    border-radius: 14px !important;
-    border: none !important;
+    border-radius: 16px !important;
+    border: 2px solid #d85080 !important;
     background: linear-gradient(135deg, #ff6b9d 0%, #ff8c42 100%) !important;
     color: white !important;
     font-family: 'Nunito', sans-serif !important;
-    font-weight: 800 !important;
-    font-size: 0.95rem !important;
-    padding: 0.6rem 1.4rem !important;
-    box-shadow: 0 6px 18px rgba(255, 107, 157, 0.35) !important;
-    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    font-weight: 900 !important;
+    font-size: 0.98rem !important;
+    padding: 0.65rem 1.5rem !important;
+    box-shadow: 0 5px 0px #cf4c7b, 0 10px 20px rgba(255, 107, 157, 0.3) !important;
+    transition: all 0.1s ease !important;
     letter-spacing: 0.01em !important;
 }
 
 div.stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 10px 26px rgba(255, 107, 157, 0.45) !important;
-    color: white !important;
-    border: none !important;
+    transform: translateY(2px) !important;
+    box-shadow: 0 3px 0px #cf4c7b, 0 6px 12px rgba(255, 107, 157, 0.35) !important;
 }
 
 div.stButton > button:active {
-    transform: translateY(0px) !important;
+    transform: translateY(5px) !important;
+    box-shadow: 0 0px 0px #cf4c7b !important;
 }
 
-/* Primary rewrite button — bigger + blue accent */
+/* Primary rewrite button — 3D Blue/Purple Accent */
 div.stButton > button[kind="primary"] {
     background: linear-gradient(135deg, #5bb8f5 0%, #7c6fe0 100%) !important;
-    box-shadow: 0 6px 20px rgba(91, 184, 245, 0.40) !important;
+    border: 2px solid #5058c0 !important;
+    box-shadow: 0 5px 0px #4048b0, 0 12px 24px rgba(91, 184, 245, 0.35) !important;
     font-size: 1.05rem !important;
-    padding: 0.7rem 1.6rem !important;
-    border-radius: 16px !important;
+    padding: 0.75rem 1.8rem !important;
+    border-radius: 18px !important;
 }
 
 div.stButton > button[kind="primary"]:hover {
-    box-shadow: 0 10px 28px rgba(91, 184, 245, 0.50) !important;
+    transform: translateY(2px) !important;
+    box-shadow: 0 3px 0px #4048b0, 0 8px 16px rgba(91, 184, 245, 0.40) !important;
 }
 
-/* ── Download button ── */
+div.stButton > button[kind="primary"]:active {
+    transform: translateY(5px) !important;
+    box-shadow: 0 0px 0px #4048b0 !important;
+}
+
+/* ── 3D Download button ── */
 div.stDownloadButton > button {
-    border-radius: 14px !important;
-    border: 2.5px solid #e8ddd8 !important;
+    border-radius: 16px !important;
+    border: 2px solid #d4c8c0 !important;
     background: #ffffff !important;
     color: #1a1a2e !important;
     font-family: 'Nunito', sans-serif !important;
-    font-weight: 700 !important;
-    box-shadow: 0 4px 12px rgba(90, 60, 40, 0.08) !important;
-    transition: transform 0.15s ease !important;
+    font-weight: 800 !important;
+    box-shadow: 0 5px 0px #d4c8c0, 0 10px 15px rgba(90, 60, 40, 0.08) !important;
+    transition: all 0.1s ease !important;
 }
 
 div.stDownloadButton > button:hover {
-    transform: translateY(-2px) !important;
+    transform: translateY(2px) !important;
     border-color: #ff8c42 !important;
-    box-shadow: 0 8px 20px rgba(90, 60, 40, 0.12) !important;
+    box-shadow: 0 3px 0px #ff8c42, 0 6px 10px rgba(90, 60, 40, 0.10) !important;
 }
 
-/* ── Text inputs & text areas ── */
+div.stDownloadButton > button:active {
+    transform: translateY(5px) !important;
+    box-shadow: 0 0px 0px #ff8c42 !important;
+}
+
+/* ── Input boxes with 3D inset styling ── */
 [data-testid="stTextArea"] textarea {
     background: #ffffff !important;
-    border: none !important;
-    border-radius: 18px !important;
+    border: 2px solid #eadecf !important;
+    border-radius: 20px !important;
     font-family: 'Nunito', sans-serif !important;
-    font-size: 0.97rem !important;
-    font-weight: 500 !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
     color: #1a1a2e !important;
-    box-shadow: 0 4px 18px rgba(90, 60, 40, 0.10) !important;
-    padding: 1rem 1.2rem !important;
-    line-height: 1.7 !important;
+    box-shadow: inset 0 2px 6px rgba(90, 60, 40, 0.06), 0 4px 12px rgba(90, 60, 40, 0.05) !important;
+    padding: 1.1rem 1.3rem !important;
+    line-height: 1.75 !important;
 }
 
 [data-testid="stTextArea"] textarea:focus {
-    box-shadow: 0 0 0 3px rgba(91, 184, 245, 0.35), 0 4px 18px rgba(90, 60, 40, 0.10) !important;
+    border-color: #5bb8f5 !important;
+    box-shadow: 0 0 0 3px rgba(91, 184, 245, 0.25), inset 0 2px 6px rgba(90, 60, 40, 0.06) !important;
 }
 
-/* ── Selectbox & Sliders ── */
+/* ── Dropdowns & selectbox with 3D base ── */
 [data-testid="stSelectbox"] > div > div {
     background: #ffffff !important;
-    border: none !important;
-    border-radius: 14px !important;
-    box-shadow: 0 4px 14px rgba(90, 60, 40, 0.09) !important;
+    border: 2px solid #eadecf !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 0px #e0d4cc, 0 8px 16px rgba(90, 60, 40, 0.05) !important;
     font-family: 'Nunito', sans-serif !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     color: #1a1a2e !important;
+}
+
+[data-testid="stSelectbox"] p {
+    color: #1a1a2e !important;
+    font-weight: 800 !important;
 }
 
 [data-testid="stSlider"] > div > div > div > div {
     background: linear-gradient(90deg, #ff6b9d, #ff8c42) !important;
 }
 
-/* ── Section headers ── */
-h3, h2, h4 {
-    font-family: 'Nunito', sans-serif !important;
-    font-weight: 900 !important;
-    color: #1a1a2e !important;
-}
-
-/* ── Metrics ── */
+/* ── 3D Metrics ── */
 [data-testid="stMetric"] {
     background: #ffffff;
-    border-radius: 18px;
-    padding: 1rem 1.2rem;
-    box-shadow: 0 4px 16px rgba(90, 60, 40, 0.09);
+    border: 2px solid #eadecf;
+    border-radius: 20px;
+    padding: 1.2rem 1.4rem;
+    box-shadow: 0 6px 0px #e0d4cc, 0 12px 20px rgba(90, 60, 40, 0.06);
 }
 
 [data-testid="stMetricLabel"] {
     font-family: 'Nunito', sans-serif !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     color: #6b5c54 !important;
-    font-size: 0.82rem !important;
+    font-size: 0.85rem !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
 }
@@ -327,22 +353,7 @@ h3, h2, h4 {
     font-family: 'Nunito', sans-serif !important;
     font-weight: 900 !important;
     color: #1a1a2e !important;
-    font-size: 1.8rem !important;
-}
-
-/* ── Checkboxes ── */
-[data-testid="stCheckbox"] label {
-    font-family: 'Nunito', sans-serif !important;
-    font-weight: 700 !important;
-    color: #3d2e28 !important;
-}
-
-/* ── Counter pill ── */
-.counter-text {
-    color: #a89080;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
+    font-size: 1.9rem !important;
 }
 
 /* ── Progress bar ── */
@@ -353,15 +364,9 @@ h3, h2, h4 {
 
 /* ── Streamlit alerts ── */
 [data-testid="stAlert"] {
-    border-radius: 16px !important;
-    font-family: 'Nunito', sans-serif !important;
-    font-weight: 600 !important;
-}
-
-/* ── Spinner ── */
-[data-testid="stSpinner"] {
-    font-family: 'Nunito', sans-serif !important;
-    font-weight: 700 !important;
+    border-radius: 18px !important;
+    border: 2px solid #eadecf !important;
+    box-shadow: 0 4px 0px #e0d4cc !important;
 }
 
 /* ── Scrollbar ── */
