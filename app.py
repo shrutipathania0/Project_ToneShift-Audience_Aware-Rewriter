@@ -36,7 +36,12 @@ st.set_page_config(
 )
 
 if CSS_PATH.exists():
+    import re
     css_content = CSS_PATH.read_text(encoding='utf-8')
+    # Remove CSS comments
+    css_content = re.sub(r'/\*.*?\*/', '', css_content, flags=re.DOTALL)
+    # Remove newlines and collapse whitespace to prevent Markdown rendering issues
+    css_content = re.sub(r'\s+', ' ', css_content).strip()
     st.markdown(
         f'<link rel="preconnect" href="https://fonts.googleapis.com">'
         f'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
