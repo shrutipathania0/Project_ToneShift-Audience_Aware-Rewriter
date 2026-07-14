@@ -57,8 +57,12 @@ def init_session_state() -> None:
         "output_text": "",
         "meaning_result": None,
         "quality_scores": None,
-        "last_tone": TONES[2],
-        "last_audience": AUDIENCES[0],
+        "tone": TONES[2],
+        "audience": AUDIENCES[0],
+        "length": 50,
+        "formality": 50,
+        "creativity": 35,
+        "history": [],
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -148,15 +152,69 @@ def render_rewrite_tab(api_key: str | None) -> None:
 
         with st.container():
             st.markdown("#### 🎛️ Rewrite Controls")
+            
+            # --- Presets Row ---
+            st.markdown("<p style='font-size: 0.85rem; font-weight: 800; color: #6b5c54; text-transform: uppercase; margin-bottom: 0.2rem;'>⚡ Quick Presets</p>", unsafe_allow_html=True)
+            p_cols = st.columns(4)
+            with p_cols[0]:
+                if st.button("🧸 Kids", use_container_width=True, key="p_kids", help="Friendly tone for children"):
+                    st.session_state.tone = "Friendly"
+                    st.session_state.audience = "Children"
+                    st.session_state.length = 60
+                    st.session_state.formality = 15
+                    st.session_state.creativity = 80
+                    st.rerun()
+            with p_cols[1]:
+                if st.button("📝 Scholar", use_container_width=True, key="p_academic", help="Academic tone for researchers"):
+                    st.session_state.tone = "Academic"
+                    st.session_state.audience = "Researchers"
+                    st.session_state.length = 80
+                    st.session_state.formality = 95
+                    st.session_state.creativity = 10
+                    st.rerun()
+            with p_cols[2]:
+                if st.button("💼 Exec", use_container_width=True, key="p_exec", help="Executive summary for business executives"):
+                    st.session_state.tone = "Executive Summary"
+                    st.session_state.audience = "Business Executives"
+                    st.session_state.length = 30
+                    st.session_state.formality = 90
+                    st.session_state.creativity = 25
+                    st.rerun()
+            with p_cols[3]:
+                if st.button("👋 Casual", use_container_width=True, key="p_casual", help="Casual tone for customers"):
+                    st.session_state.tone = "Casual"
+                    st.session_state.audience = "Customers"
+                    st.session_state.length = 50
+                    st.session_state.formality = 20
+                    st.session_state.creativity = 50
+                    st.rerun()
+
             c1, c2 = st.columns(2)
             with c1:
-                tone = st.selectbox("Tone", TONES, index=2)
+                t_idx = TONES.index(st.session_state.tone) if st.session_state.tone in TONES else 2
+                tone = st.selectbox("Tone", TONES, index=t_idx, key="selectbox_tone")
+                st.session_state.tone = tone
             with c2:
-                audience = st.selectbox("Target Audience", AUDIENCES)
+                a_idx = AUDIENCES.index(st.session_state.audience) if st.session_state.audience in AUDIENCES else 0
+                audience = st.selectbox("Target Audience", AUDIENCES, index=a_idx, key="selectbox_audience")
+                st.session_state.audience = audience
 
-            length = st.slider("Length", 0, 100, 50, help="0 = Very Short, 50 = Medium, 100 = Detailed")
-            formality = st.slider("Formality", 0, 100, 50, help="0 = Very Casual, 100 = Very Formal")
-            creativity = st.slider("Creativity", 0, 100, 35, help="0 = Conservative, 100 = Creative")
+            # Live selection banner
+            st.markdown(
+                f'<div style="background: #ffffff; border: 2px solid #eadecf; border-radius: 18px; padding: 0.8rem 1rem; margin-top: 0.2rem; margin-bottom: 1.2rem; text-align: center; box-shadow: 0 4px 0px #e0d4cc;">'
+                f'<span style="font-weight: 800; color: #6b5c54; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Selected Target</span><br>'
+                f'<span style="font-weight: 900; color: #1a1a2e; font-size: 1.15rem;">🎙️ {tone} &nbsp;➔&nbsp; 👥 {audience}</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+            length = st.slider("Length", 0, 100, st.session_state.length, help="0 = Very Short, 50 = Medium, 100 = Detailed")
+            formality = st.slider("Formality", 0, 100, st.session_state.formality, help="0 = Very Casual, 100 = Very Formal")
+            creativity = st.slider("Creativity", 0, 100, st.session_state.creativity, help="0 = Conservative, 100 = Creative")
+            
+            st.session_state.length = length
+            st.session_state.formality = formality
+            st.session_state.creativity = creativity
 
             st.markdown("##### ⚙️ Advanced Options")
             a1, a2 = st.columns(2)
@@ -259,6 +317,20 @@ def render_rewrite_tab(api_key: str | None) -> None:
                 original=input_text,
                 rewritten=result.text,
             )
+
+            # Save to history list
+            history_item = {
+                "original": input_text,
+                "rewritten": result.text,
+                "tone": tone,
+                "audience": audience,
+                "score": st.session_state.quality_scores.overall if st.session_state.quality_scores else 100
+            }
+            if "history" not in st.session_state:
+                st.session_state.history = []
+            if not st.session_state.history or st.session_state.history[0] != history_item:
+                st.session_state.history.insert(0, history_item)
+                st.session_state.history = st.session_state.history[:5]
 
             progress.progress(100, text="Done!")
             st.success("Rewrite completed successfully!")
@@ -369,6 +441,35 @@ def render_meaning_tab(api_key: str | None) -> None:
             )
 
 
+def render_history_tab() -> None:
+    st.subheader("📜 Saved Runs & History")
+    if "history" not in st.session_state or not st.session_state.history:
+        st.info("No saved runs yet. Generate a rewrite to see history here.")
+        return
+
+    for idx, item in enumerate(st.session_state.history):
+        st.markdown(
+            f'<div class="ts-card">'
+            f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">'
+            f'<span style="font-weight: 900; color: #1a1a2e; font-size: 1.05rem;">🎙️ {item["tone"]} &nbsp;➔&nbsp; 👥 {item["audience"]}</span>'
+            f'<span style="background: linear-gradient(135deg, #ff6b9d, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 1.1rem;">Score: {item["score"]}/100</span>'
+            f'</div>'
+            f'<div style="color: #6b5c54; font-size: 0.9rem; margin-bottom: 0.5rem;"><b>Original:</b> {html.escape(item["original"][:150])}...</div>'
+            f'<div style="color: #1a1a2e; font-size: 0.95rem; font-weight: 600; background: #f5ede8; padding: 0.8rem; border-radius: 12px; border: 1px solid #eadecf;">{html.escape(item["rewritten"])}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        
+        c1, c2 = st.columns([1, 4])
+        with c1:
+            if st.button("🔄 Restore", key=f"restore_{idx}", use_container_width=True):
+                st.session_state.input_text = item["original"]
+                st.session_state.output_text = item["rewritten"]
+                st.session_state.tone = item["tone"]
+                st.session_state.audience = item["audience"]
+                st.rerun()
+
+
 def render_about_tab() -> None:
     st.subheader("ℹ️ About ToneShift")
     st.markdown(
@@ -427,8 +528,8 @@ def main() -> None:
             "Get your free API key at [console.groq.com](https://console.groq.com) 🔑"
         )
 
-    tab_rewrite, tab_compare, tab_meaning, tab_about = st.tabs(
-        ["✍️ Rewrite", "🔍 Comparison", "🧠 Meaning Check", "ℹ️ About"]
+    tab_rewrite, tab_compare, tab_meaning, tab_history, tab_about = st.tabs(
+        ["✍️ Rewrite", "🔍 Comparison", "🧠 Meaning Check", "📜 Saved Runs", "ℹ️ About"]
     )
 
     with tab_rewrite:
@@ -439,6 +540,9 @@ def main() -> None:
 
     with tab_meaning:
         render_meaning_tab(api_key)
+
+    with tab_history:
+        render_history_tab()
 
     with tab_about:
         render_about_tab()

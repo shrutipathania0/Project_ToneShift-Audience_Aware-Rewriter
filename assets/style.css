@@ -324,12 +324,18 @@ div.stDownloadButton > button:active {
     height: 48px !important;
 }
 
-/* Force dark selected value text */
-[data-testid="stSelectbox"] [data-baseweb="select"] * {
+/* Force dark selected value text (with bulletproof global overrides for all possible Streamlit markup) */
+[data-testid="stSelectbox"] [data-baseweb="select"] *,
+[data-testid="stSelectbox"] select,
+[data-testid="stSelectbox"] input,
+[data-testid="stSelectbox"] span,
+[data-testid="stSelectbox"] div,
+.stSelectbox *,
+.stSelectbox span,
+.stSelectbox div {
     color: #1a1a2e !important;
     font-family: 'Nunito', sans-serif !important;
     font-weight: 800 !important;
-    font-size: 0.95rem !important;
 }
 
 /* Dropdown Menu Portal Overlay Styling */
