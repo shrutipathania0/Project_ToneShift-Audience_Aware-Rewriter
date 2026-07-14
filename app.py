@@ -36,13 +36,12 @@ st.set_page_config(
 )
 
 if CSS_PATH.exists():
+    css_content = CSS_PATH.read_text(encoding='utf-8')
     st.markdown(
-        f"""
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-        <style>{CSS_PATH.read_text(encoding='utf-8')}</style>
-        """,
+        f'<link rel="preconnect" href="https://fonts.googleapis.com">'
+        f'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+        f'<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">'
+        f'<style>{css_content}</style>',
         unsafe_allow_html=True,
     )
 
@@ -63,26 +62,16 @@ def init_session_state() -> None:
 
 def render_header() -> None:
     st.markdown(
-        """
-        <div class="ts-hero">
-            <h1>✨ ToneShift</h1>
-            <p>Audience-Aware Rewriter — adapt tone, vocabulary &amp; complexity without changing meaning.</p>
-            <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;">
-                <div style="background:#fff3e0;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#b85c00;box-shadow:0 4px 12px rgba(255,140,66,0.20);">
-                    🎙️ 8 Tones
-                </div>
-                <div style="background:#fce4ec;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#a0004a;box-shadow:0 4px 12px rgba(255,107,157,0.20);">
-                    👥 8 Audiences
-                </div>
-                <div style="background:#e3f2fd;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#0050a0;box-shadow:0 4px 12px rgba(91,184,245,0.20);">
-                    🧠 Meaning Check
-                </div>
-                <div style="background:#e8f5e9;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#1b5e20;box-shadow:0 4px 12px rgba(46,204,113,0.20);">
-                    📊 Quality Score
-                </div>
-            </div>
-        </div>
-        """,
+        '<div class="ts-hero">'
+        '<h1>✨ ToneShift</h1>'
+        '<p>Audience-Aware Rewriter — adapt tone, vocabulary &amp; complexity without changing meaning.</p>'
+        '<div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;">'
+        '<div style="background:#fff3e0;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#b85c00;box-shadow:0 4px 12px rgba(255,140,66,0.20);">🎙️ 8 Tones</div>'
+        '<div style="background:#fce4ec;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#a0004a;box-shadow:0 4px 12px rgba(255,107,157,0.20);">👥 8 Audiences</div>'
+        '<div style="background:#e3f2fd;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#0050a0;box-shadow:0 4px 12px rgba(91,184,245,0.20);">🧠 Meaning Check</div>'
+        '<div style="background:#e8f5e9;border-radius:50px;padding:0.45rem 1.1rem;font-weight:800;font-size:0.85rem;color:#1b5e20;box-shadow:0 4px 12px rgba(46,204,113,0.20);">📊 Quality Score</div>'
+        '</div>'
+        '</div>',
         unsafe_allow_html=True,
     )
 
@@ -112,13 +101,7 @@ def copy_button(label: str, text: str, key: str) -> None:
 
 def score_card(title: str, score: int) -> None:
     st.markdown(
-        f"""
-        <div class="ts-card">
-            <h4>{title}</h4>
-            <div class="score">{score}</div>
-            <div class="ts-metric-label">out of 100</div>
-        </div>
-        """,
+        f'<div class="ts-card"><h4>{title}</h4><div class="score">{score}</div><div class="ts-metric-label">out of 100</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -138,13 +121,7 @@ def render_quality_scores(scores) -> None:
             score_card(label, value)
 
     st.markdown(
-        f"""
-        <div class="ts-card">
-            <h4>Overall Score</h4>
-            <div class="score">{scores.overall}</div>
-            <div class="ts-metric-label">weighted composite</div>
-        </div>
-        """,
+        f'<div class="ts-card"><h4>Overall Score</h4><div class="score">{scores.overall}</div><div class="ts-metric-label">weighted composite</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -227,13 +204,9 @@ def render_rewrite_tab(api_key: str | None) -> None:
         meaning = st.session_state.meaning_result
         if meaning and meaning.meaning_preservation_score < 90:
             st.markdown(
-                f"""
-                <div class="ts-warning">
-                    <b>⚠️ Meaning Preservation Warning</b><br>
-                    Confidence is below 90% ({meaning.meaning_preservation_score}%). Review the rewrite carefully.
-                    <br><br>{html.escape(meaning.explanation)}
-                </div>
-                """,
+                f'<div class="ts-warning"><b>⚠️ Meaning Preservation Warning</b><br>'
+                f'Confidence is below 90% ({meaning.meaning_preservation_score}%). Review the rewrite carefully.'
+                f'<br><br>{html.escape(meaning.explanation)}</div>',
                 unsafe_allow_html=True,
             )
 
