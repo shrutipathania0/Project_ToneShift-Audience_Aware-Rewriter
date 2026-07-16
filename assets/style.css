@@ -438,3 +438,38 @@ h3, h2, h4 {
 ::-webkit-scrollbar-track { background: #f5ede8; border-radius: 99px; }
 ::-webkit-scrollbar-thumb { background: #d4b8ae; border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: #c4a090; }
+
+/* ── Quality Score Dashboard ── */
+.q-dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.q-dashboard .q-card {
+    flex: 1 1 calc(16.66% - 0.75rem);
+    min-width: 135px;
+    margin-bottom: 0 !important;
+    text-align: center;
+    padding: 1rem 0.5rem !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.q-dashboard .q-card h4 {
+    white-space: nowrap !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.3rem !important;
+}
+
+.q-dashboard .overall-card {
+    background: linear-gradient(135deg, #fffcf5, #fcf6eb) !important;
+    border: 2px solid #e2d1c3 !important;
+}
+

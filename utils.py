@@ -8,10 +8,12 @@ import html
 import json
 import os
 import re
+import time
 from dataclasses import dataclass
 from typing import Any, Optional
 
 import groq
+import streamlit as st
 from dotenv import load_dotenv
 from groq import Groq
 
@@ -30,6 +32,11 @@ from prompts import (
 load_dotenv()
 
 WORDS_PER_MINUTE = 200
+MAX_RATE_LIMIT_RETRIES = 4
+DEFAULT_RETRY_DELAY_SECONDS = 3.0
+MAX_RETRY_WAIT_SECONDS = 30.0
+# Pacing constants removed to maximize parallel execution speed.
+# Rate limit retries and exponential backoff are still fully active.
 
 
 @dataclass
@@ -94,6 +101,19 @@ def create_client(api_key: str) -> Groq:
     return Groq(api_key=api_key)
 
 
+def get_or_create_client(api_key: str) -> Groq:
+    """Return a cached Groq client from session state, creating one if needed.
+
+    This avoids creating a new HTTP client on every Streamlit rerun and
+    ensures connection pooling is reused across requests.
+    """
+    import streamlit as st  # noqa: PLC0415
+
+    if "groq_client" not in st.session_state or st.session_state.groq_client is None:
+        st.session_state.groq_client = Groq(api_key=api_key)
+    return st.session_state.groq_client
+
+
 def count_characters(text: str) -> int:
     return len(text or "")
 
@@ -111,6 +131,7 @@ def estimate_reading_time_minutes(text: str) -> float:
     return round(words / WORDS_PER_MINUTE, 1)
 
 
+@st.cache_data
 def similarity_percentage(text_a: str, text_b: str) -> float:
     if not text_a and not text_b:
         return 100.0
@@ -120,6 +141,7 @@ def similarity_percentage(text_a: str, text_b: str) -> float:
     return round(ratio * 100, 1)
 
 
+@st.cache_data
 def highlight_word_differences(original: str, rewritten: str) -> tuple[str, str]:
     """Return HTML-highlighted versions of original and rewritten text."""
     original_words = original.split()
@@ -178,6 +200,9 @@ def _strip_json_fences(text: str) -> str:
     return cleaned.strip()
 
 
+
+
+
 def _call_groq(
     client: Groq,
     *,
@@ -185,7 +210,7 @@ def _call_groq(
     user_prompt: str,
     temperature: float = 0.4,
     json_mode: bool = False,
-    max_output_tokens: int = 8192,
+    max_output_tokens: int = 2048,
 ) -> LLMResult:
     messages = [
         {"role": "system", "content": system_instruction},
@@ -203,7 +228,29 @@ def _call_groq(
         kwargs["response_format"] = {"type": "json_object"}
 
     try:
-        response = client.chat.completions.create(**kwargs)
+        # Retry loop with exponential backoff for transient rate limits.
+        # Does not keep retrying when an account has exhausted its daily quota.
+        for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):
+            try:
+                response = client.chat.completions.create(**kwargs)
+                break
+            except groq.RateLimitError as exc:
+                if attempt == MAX_RATE_LIMIT_RETRIES:
+                    raise
+
+                # Respect the retry-after header if provided
+                headers = getattr(getattr(exc, "response", None), "headers", {}) or {}
+                retry_after = headers.get("retry-after")
+                try:
+                    delay = max(float(retry_after), DEFAULT_RETRY_DELAY_SECONDS)
+                except (TypeError, ValueError):
+                    delay = DEFAULT_RETRY_DELAY_SECONDS * (2 ** attempt)
+                
+                # Add random jitter to prevent parallel requests from retrying in lockstep
+                import random
+                jittered_delay = delay * random.uniform(0.7, 1.3)
+                time.sleep(min(jittered_delay, MAX_RETRY_WAIT_SECONDS))
+
         text = _extract_response_text(response)
         if json_mode:
             text = _strip_json_fences(text)
@@ -214,8 +261,19 @@ def _call_groq(
             "auth",
         ) from exc
     except groq.RateLimitError as exc:
+        # Distinguish between per-minute throttle and daily quota exhaustion
+        err_msg = str(exc).lower()
+        if "quota" in err_msg or "daily" in err_msg:
+            raise ToneShiftError(
+                "Your Groq API quota has been reached for today. "
+                "Please wait for it to reset (usually resets daily). "
+                "You can check your usage at console.groq.com.",
+                "rate_limit",
+            ) from exc
         raise ToneShiftError(
-            "Rate limit exceeded. Please wait a moment and try again.",
+            "Groq's per-minute request limit has been reached. "
+            "Please wait about 60 seconds and try again. "
+            "Tip: uncheck 'Run quality and meaning checks' to use fewer API calls per rewrite.",
             "rate_limit",
         ) from exc
     except groq.PermissionDeniedError as exc:
@@ -303,6 +361,7 @@ def back_translate(client: Groq, rewritten_text: str) -> LLMResult:
         system_instruction=BACK_TRANSLATION_SYSTEM,
         user_prompt=build_back_translation_prompt(rewritten_text.strip()),
         temperature=0.1,
+        max_output_tokens=1024,
     )
 
 
@@ -311,14 +370,21 @@ def check_meaning_drift(
     *,
     original: str,
     rewritten: str,
+    neutral_text: Optional[str] = None,
 ) -> MeaningCheckResult:
-    neutral = back_translate(client, rewritten)
+    if neutral_text is None:
+        neutral = back_translate(client, rewritten)
+        neutral_content = neutral.text
+    else:
+        neutral_content = neutral_text
+
     result = _call_groq(
         client,
         system_instruction=MEANING_CHECK_SYSTEM,
-        user_prompt=build_meaning_check_prompt(original, neutral.text),
+        user_prompt=build_meaning_check_prompt(original, neutral_content, rewritten=rewritten),
         temperature=0.0,
         json_mode=True,
+        max_output_tokens=512,
     )
 
     try:
@@ -334,7 +400,7 @@ def check_meaning_drift(
         confidence=int(payload.get("confidence", 0)),
         meaning_preservation_score=int(payload.get("meaning_preservation_score", 0)),
         explanation=str(payload.get("explanation", "No explanation provided.")),
-        neutral_text=neutral.text,
+        neutral_text=neutral_content,
     )
 
 
@@ -352,6 +418,7 @@ def evaluate_quality(
         user_prompt=build_quality_score_prompt(original, rewritten, tone, audience),
         temperature=0.0,
         json_mode=True,
+        max_output_tokens=512,
     )
 
     try:

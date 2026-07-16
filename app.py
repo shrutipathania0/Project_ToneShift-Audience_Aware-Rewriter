@@ -9,16 +9,17 @@ import pathlib
 import streamlit as st
 import streamlit.components.v1 as components
 
-from prompts import AUDIENCES, TONES
+from prompts import AUDIENCES, MODEL_NAME, TONES
 from utils import (
     ToneShiftError,
+    back_translate,
     check_meaning_drift,
     count_characters,
     count_words,
-    create_client,
     estimate_reading_time_minutes,
     evaluate_quality,
     get_api_key,
+    get_or_create_client,
     highlight_word_differences,
     rewrite_text,
     similarity_percentage,
@@ -62,6 +63,7 @@ def init_session_state() -> None:
         "length": 50,
         "formality": 50,
         "creativity": 35,
+        "run_advanced_checks": False,
         "history": [],
     }
     for key, value in defaults.items():
@@ -83,6 +85,7 @@ def render_header() -> None:
         '</div>',
         unsafe_allow_html=True,
     )
+    st.caption(f"Active Groq model: `{MODEL_NAME}`")
 
 
 def render_counters(text: str) -> None:
@@ -117,20 +120,40 @@ def score_card(title: str, score: int) -> None:
 
 def render_quality_scores(scores) -> None:
     st.subheader("📊 Quality Scores")
-    cols = st.columns(5)
+    
     metrics = [
         ("Meaning Preservation", scores.meaning_preservation),
-        ("Grammar", scores.grammar),
+        ("Grammar Score", scores.grammar),
         ("Readability", scores.readability),
         ("Tone Accuracy", scores.tone_accuracy),
         ("Audience Match", scores.audience_match),
     ]
-    for col, (label, value) in zip(cols, metrics):
-        with col:
-            score_card(label, value)
-
+    
+    cards_html = ""
+    for label, value in metrics:
+        cards_html += f"""
+        <div class="ts-card q-card">
+            <h4>{label}</h4>
+            <div class="score">{value}</div>
+            <div class="ts-metric-label">out of 100</div>
+        </div>
+        """
+        
+    overall_html = f"""
+    <div class="ts-card q-card overall-card">
+        <h4>Overall Score</h4>
+        <div class="score">{scores.overall}</div>
+        <div class="ts-metric-label">weighted composite</div>
+    </div>
+    """
+    
     st.markdown(
-        f'<div class="ts-card"><h4>Overall Score</h4><div class="score">{scores.overall}</div><div class="ts-metric-label">weighted composite</div></div>',
+        f"""
+        <div class="q-dashboard">
+            {cards_html}
+            {overall_html}
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
@@ -225,6 +248,13 @@ def render_rewrite_tab(api_key: str | None) -> None:
                 maintain_bullets = st.checkbox("Maintain bullet points", value=True)
                 keep_numbers = st.checkbox("Keep numbers unchanged", value=True)
 
+            run_advanced_checks = st.checkbox(
+                "Run quality and meaning checks after rewriting",
+                value=st.session_state.run_advanced_checks,
+                help="Uses three additional Groq requests. Leave off to conserve API quota.",
+            )
+            st.session_state.run_advanced_checks = run_advanced_checks
+
             rewrite_clicked = st.button("🚀 Rewrite Text", use_container_width=True, type="primary")
 
     with right:
@@ -283,7 +313,7 @@ def render_rewrite_tab(api_key: str | None) -> None:
 
         progress = st.progress(0, text="Preparing rewrite...")
         try:
-            client = create_client(api_key)
+            client = get_or_create_client(api_key)
             progress.progress(20, text="Rewriting with Groq...")
             result = rewrite_text(
                 client,
@@ -302,21 +332,40 @@ def render_rewrite_tab(api_key: str | None) -> None:
             st.session_state.last_tone = tone
             st.session_state.last_audience = audience
 
-            progress.progress(55, text="Evaluating quality...")
-            st.session_state.quality_scores = evaluate_quality(
-                client,
-                original=input_text,
-                rewritten=result.text,
-                tone=tone,
-                audience=audience,
-            )
-
-            progress.progress(80, text="Running meaning drift check...")
-            st.session_state.meaning_result = check_meaning_drift(
-                client,
-                original=input_text,
-                rewritten=result.text,
-            )
+            st.session_state.quality_scores = None
+            st.session_state.meaning_result = None
+            if run_advanced_checks:
+                progress.progress(50, text="Running quality and meaning analysis in parallel...")
+                
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                    future_quality = executor.submit(
+                        evaluate_quality,
+                        client,
+                        original=input_text,
+                        rewritten=result.text,
+                        tone=tone,
+                        audience=audience,
+                    )
+                    future_back_translation = executor.submit(
+                        back_translate,
+                        client,
+                        rewritten_text=result.text,
+                    )
+                    
+                    # Gather results
+                    quality_scores = future_quality.result()
+                    neutral_result = future_back_translation.result()
+                
+                st.session_state.quality_scores = quality_scores
+                
+                progress.progress(80, text="Running meaning drift check...")
+                st.session_state.meaning_result = check_meaning_drift(
+                    client,
+                    original=input_text,
+                    rewritten=result.text,
+                    neutral_text=neutral_result.text,
+                )
 
             # Save to history list
             history_item = {
@@ -324,7 +373,7 @@ def render_rewrite_tab(api_key: str | None) -> None:
                 "rewritten": result.text,
                 "tone": tone,
                 "audience": audience,
-                "score": st.session_state.quality_scores.overall if st.session_state.quality_scores else 100
+                "score": st.session_state.quality_scores.overall if st.session_state.quality_scores else None
             }
             if "history" not in st.session_state:
                 st.session_state.history = []
@@ -408,7 +457,7 @@ def render_meaning_tab(api_key: str | None) -> None:
             return
         try:
             with st.spinner("Analyzing meaning preservation..."):
-                client = create_client(api_key)
+                client = get_or_create_client(api_key)
                 st.session_state.meaning_result = check_meaning_drift(
                     client,
                     original=original,
@@ -448,11 +497,12 @@ def render_history_tab() -> None:
         return
 
     for idx, item in enumerate(st.session_state.history):
+        score_label = f"Score: {item['score']}/100" if item["score"] is not None else "Score: not run"
         st.markdown(
             f'<div class="ts-card">'
             f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">'
             f'<span style="font-weight: 900; color: #1a1a2e; font-size: 1.05rem;">🎙️ {item["tone"]} &nbsp;➔&nbsp; 👥 {item["audience"]}</span>'
-            f'<span style="background: linear-gradient(135deg, #ff6b9d, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 1.1rem;">Score: {item["score"]}/100</span>'
+            f'<span style="background: linear-gradient(135deg, #ff6b9d, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 1.1rem;">{score_label}</span>'
             f'</div>'
             f'<div style="color: #6b5c54; font-size: 0.9rem; margin-bottom: 0.5rem;"><b>Original:</b> {html.escape(item["original"][:150])}...</div>'
             f'<div style="color: #1a1a2e; font-size: 0.95rem; font-weight: 600; background: #f5ede8; padding: 0.8rem; border-radius: 12px; border: 1px solid #eadecf;">{html.escape(item["rewritten"])}</div>'

@@ -1,5 +1,7 @@
 """Prompt templates for ToneShift: Audience-Aware Rewriter."""
 
+# The 70B model has double the TPM limits (12,000 vs 6,000) on this API key,
+# in addition to being the model referenced in the About tab.
 MODEL_NAME = "llama-3.3-70b-versatile"
 
 TONES = [
@@ -24,30 +26,49 @@ AUDIENCES = [
     "Researchers",
 ]
 
-REWRITE_SYSTEM_PROMPT = """You are ToneShift, an expert audience-aware writing editor.
+REWRITE_SYSTEM_PROMPT = """\
+You are ToneShift, an expert audience-aware writing editor.
 
 Your job is to rewrite text for a specific tone and audience while preserving the EXACT factual meaning.
 
-STRICT RULES — NEVER VIOLATE:
-1. Never invent facts, claims, statistics, names, dates, URLs, or examples not present in the source.
-2. Never remove important information, caveats, qualifications, or key details.
-3. Preserve semantic equivalence: the rewritten text must convey the same facts and intent.
-4. Rewrite ONLY style: tone, vocabulary, sentence structure, complexity, and reading level.
-5. Keep all proper nouns, dates, statistics, URLs, email addresses, code identifiers, and numbers unchanged unless a minimal grammatical adjustment is required.
-6. If technical terms must be preserved, keep them exactly as written.
-7. If formatting must be preserved, retain paragraph breaks, bullet structure, and list markers.
-8. If bullet points must be maintained, keep the same list structure and item count.
-9. If numbers must stay unchanged, do not round, reformat, or substitute numeric values.
-10. If the input is already close to the requested tone and audience, make light polish improvements instead of unnecessary rewriting.
+═══════════════════════════════════════════
+STEP-BY-STEP PROCESS (follow every time):
+═══════════════════════════════════════════
+1. EXTRACT: Mentally list every fact, name, number, date, percentage, URL, email, statistic, and specific claim in the source text.
+2. PLAN: Decide how to adjust tone, vocabulary, and sentence structure for the target audience WITHOUT altering any extracted fact.
+3. REWRITE: Produce the rewritten text, ensuring every extracted fact appears in the output unchanged.
+4. VERIFY: Before finalizing, mentally confirm that no fact was added, removed, changed, rounded, or paraphrased.
 
+═══════════════════════════════════════════
+ABSOLUTE RULES — NEVER VIOLATE:
+═══════════════════════════════════════════
+1. NEVER invent facts, claims, statistics, names, dates, URLs, or examples not present in the source.
+2. NEVER remove important information, caveats, qualifications, or key details.
+3. NEVER change numbers. "500 employees" must NOT become "hundreds of employees." "$2.3 million" must NOT become "millions of dollars."
+4. NEVER paraphrase proper nouns. "Microsoft Azure" must NOT become "a cloud platform." "Dr. Sarah Chen" must NOT become "a researcher."
+5. NEVER substitute specific data with vague language. Keep all specifics exact.
+6. Preserve semantic equivalence: the rewritten text must convey the same facts and intent.
+7. Rewrite ONLY style: tone, vocabulary, sentence structure, complexity, and reading level.
+8. Keep all proper nouns, dates, statistics, URLs, email addresses, code identifiers, and numbers unchanged unless a minimal grammatical adjustment is required.
+9. If technical terms must be preserved, keep them exactly as written.
+10. If formatting must be preserved, retain paragraph breaks, bullet structure, and list markers.
+11. If bullet points must be maintained, keep the same list structure and item count.
+12. If numbers must stay unchanged, do not round, reformat, or substitute numeric values.
+13. If the input is already close to the requested tone and audience, make light polish improvements instead of unnecessary rewriting. Still make noticeable style adjustments.
+
+═══════════════════════════════════════════
 AUDIENCE & STYLE GUIDANCE:
+═══════════════════════════════════════════
 - Match vocabulary and complexity to the target audience.
 - Adjust formality on a 0–100 scale (0 = very casual, 100 = very formal).
 - Adjust length on a 0–100 scale (0 = very short/concise, 50 = medium, 100 = detailed/expansive).
 - Adjust creativity on a 0–100 scale (0 = conservative/literal, 100 = creative expression while preserving facts).
 - Apply the selected tone authentically without distorting meaning.
+- Make the rewritten text sound natural and human, not robotic or overly formulaic.
 
+═══════════════════════════════════════════
 OUTPUT:
+═══════════════════════════════════════════
 Return ONLY the rewritten text. No preamble, no explanation, no markdown fences unless they were in the original."""
 
 
@@ -96,20 +117,38 @@ SOURCE TEXT:
 {text}
 \"\"\"
 
+CRITICAL REMINDER: Before writing, mentally list every name, number, date, URL, email, and specific claim in the source text. Every single one MUST appear in your rewrite, unchanged. Do NOT invent new information. Do NOT remove any details.
+
 Return only the rewritten text."""
 
 
-BACK_TRANSLATION_SYSTEM = """You are a neutral meaning extractor.
+BACK_TRANSLATION_SYSTEM = """\
+You are a factual content extractor.
 
-Explain the given text in plain, neutral, audience-agnostic language.
-- State only what the text actually says.
-- Do not add interpretation, opinion, or new facts.
-- Use simple, direct sentences.
-- Return only the neutral explanation."""
+Given a text, produce a neutral factual summary that captures ALL information from the text.
+
+YOUR EXTRACTION MUST INCLUDE:
+1. Every specific claim, fact, and statement made in the text
+2. All names, numbers, dates, percentages, URLs, and email addresses — with EXACT values
+3. All cause-effect relationships and logical connections
+4. All caveats, qualifications, conditions, and exceptions
+5. The overall intent and purpose of the text
+
+STRICT RULES:
+- Do NOT add any information not present in the text
+- Do NOT omit any factual detail, no matter how small
+- Do NOT interpret, editorialize, or add opinion
+- Use plain, neutral language with no stylistic tone
+- Preserve the same level of detail as the source
+- Present facts in the same order as the source text
+- If the text mentions a specific number like "42%" or "$1.5 million", reproduce it exactly
+
+OUTPUT:
+Return only the neutral factual extraction. No preamble."""
 
 
 def build_back_translation_prompt(rewritten_text: str) -> str:
-    return f"""Explain the following text in plain neutral language:
+    return f"""Extract all factual content from the following text in plain neutral language:
 
 \"\"\"
 {rewritten_text}
@@ -117,43 +156,67 @@ def build_back_translation_prompt(rewritten_text: str) -> str:
 """
 
 
-MEANING_CHECK_SYSTEM = """You are a semantic equivalence auditor for text rewriting.
+MEANING_CHECK_SYSTEM = """\
+You are a semantic equivalence auditor for a text rewriting tool.
 
-Compare an ORIGINAL text with a NEUTRAL BACK-TRANSLATION of its rewrite.
+Your job: compare an ORIGINAL text with a NEUTRAL FACTUAL EXTRACTION of its rewrite, and determine whether the rewrite preserved the original meaning.
 
-Determine whether factual meaning has been preserved.
+═══════════════════════════════════════════
+PROCESS:
+═══════════════════════════════════════════
+1. List the key facts, claims, and details from the ORIGINAL text.
+2. List the key facts, claims, and details from the NEUTRAL EXTRACTION.
+3. Compare them point by point.
+4. Identify any facts that were: ADDED (not in original), REMOVED (in original but missing), or CHANGED (altered in meaning or specificity).
 
-Classify as exactly one of:
-- "meaning_preserved" — same facts, intent, and key details
-- "minor_drift" — mostly preserved but small nuance, emphasis, or minor detail shifted
-- "major_drift" — facts added, removed, or materially changed
+═══════════════════════════════════════════
+CLASSIFICATION RULES:
+═══════════════════════════════════════════
+- "meaning_preserved" — ALL facts, claims, and key details match. No additions, removals, or factual changes. Minor wording differences are fine.
+- "minor_drift" — Most facts preserved, but one or two small details shifted in emphasis, specificity, or nuance. No major factual errors.
+- "major_drift" — One or more facts were added, removed, or materially changed. Specific numbers became vague. Names were omitted. Claims were altered.
 
-Be strict about factual changes. Style differences alone are NOT drift.
+IMPORTANT CALIBRATION:
+- Style differences alone (formal→casual, long→short) are NOT drift.
+- Changing "500 employees" to "many employees" IS drift (loss of specificity).
+- Omitting a caveat like "in most cases" IS drift (removes qualification).
+- Adding a claim not in the original IS drift (fabrication).
+- Reordering facts without changing them is NOT drift.
 
 Return JSON only."""
 
 
-def build_meaning_check_prompt(original: str, neutral: str) -> str:
+def build_meaning_check_prompt(original: str, neutral: str, rewritten: str = "") -> str:
+    rewritten_section = ""
+    if rewritten:
+        rewritten_section = f"""
+REWRITTEN TEXT (for reference):
+\"\"\"
+{rewritten}
+\"\"\"
+"""
+
     return f"""ORIGINAL TEXT:
 \"\"\"
 {original}
 \"\"\"
-
-NEUTRAL BACK-TRANSLATION OF REWRITE:
+{rewritten_section}
+NEUTRAL FACTUAL EXTRACTION OF THE REWRITE:
 \"\"\"
 {neutral}
 \"\"\"
 
-Has any factual meaning changed between the original and the rewrite (via neutral explanation)?
+Compare the ORIGINAL TEXT with the NEUTRAL EXTRACTION. Has any factual meaning been added, removed, or changed?
 
 Return JSON with:
 - status: "meaning_preserved", "minor_drift", or "major_drift"
 - confidence: integer 0-100 (how confident you are in this assessment)
-- meaning_preservation_score: integer 0-100
-- explanation: brief user-friendly explanation"""
+- meaning_preservation_score: integer 0-100 (100 = perfect preservation, 0 = completely different meaning)
+- explanation: brief user-friendly explanation of what was preserved or changed"""
 
 
-QUALITY_SCORE_SYSTEM = """You are a writing quality evaluator.
+QUALITY_SCORE_SYSTEM = """\
+You are a writing quality evaluator.
 
 Score a rewritten text against its original for a college writing tool.
 
