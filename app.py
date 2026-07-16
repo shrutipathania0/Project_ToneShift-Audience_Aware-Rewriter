@@ -335,31 +335,22 @@ def render_rewrite_tab(api_key: str | None) -> None:
             st.session_state.quality_scores = None
             st.session_state.meaning_result = None
             if run_advanced_checks:
-                progress.progress(50, text="Running quality and meaning analysis in parallel...")
+                progress.progress(45, text="Evaluating rewrite quality...")
+                st.session_state.quality_scores = evaluate_quality(
+                    client,
+                    original=input_text,
+                    rewritten=result.text,
+                    tone=tone,
+                    audience=audience,
+                )
                 
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                    future_quality = executor.submit(
-                        evaluate_quality,
-                        client,
-                        original=input_text,
-                        rewritten=result.text,
-                        tone=tone,
-                        audience=audience,
-                    )
-                    future_back_translation = executor.submit(
-                        back_translate,
-                        client,
-                        rewritten_text=result.text,
-                    )
-                    
-                    # Gather results
-                    quality_scores = future_quality.result()
-                    neutral_result = future_back_translation.result()
+                progress.progress(70, text="Preparing meaning check...")
+                neutral_result = back_translate(
+                    client,
+                    rewritten_text=result.text,
+                )
                 
-                st.session_state.quality_scores = quality_scores
-                
-                progress.progress(80, text="Running meaning drift check...")
+                progress.progress(85, text="Running meaning drift check...")
                 st.session_state.meaning_result = check_meaning_drift(
                     client,
                     original=input_text,
