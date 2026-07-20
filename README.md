@@ -113,13 +113,6 @@ ToneShift/
 
 ---
 
-## Screenshots
-
-| Rewrite Tab | Comparison Tab | Meaning Check |
-|-------------|----------------|---------------|
-| _Add screenshot here_ | _Add screenshot here_ | _Add screenshot here_ |
-
----
 
 ## Future Improvements
 
